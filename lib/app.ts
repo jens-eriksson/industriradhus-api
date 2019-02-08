@@ -3,14 +3,25 @@ import * as bodyParser from "body-parser";
 import { Routes } from "./routes/routes";
 import * as mongoose from "mongoose";
 import * as cors from 'cors';
+import * as fs from 'fs';
+import * as path from 'path';
 
 class App {
 
     public app: express.Application;
     public routes: Routes = new Routes();
-    private password = encodeURIComponent("8rhYtyYHRWR5Hz8xuhOQKtrb7Ua1mdqKDc3WWfYJeDItOi7uRZ6FmspVp1zSFiLTs8VsIDX9yazgU3oIgHO9xg==");
-    public mongoUrl: string = "mongodb://industriradhus:" + this.password + "@industriradhus.documents.azure.com:10255/industriradhus?ssl=true&replicaSet=globaldb";
-    // 'mongodb://localhost/industriradhus';
+
+    private ca = [fs.readFileSync(path.join(__dirname, '../secrets/rootCA.pem') , 'utf8')];
+    private cert = fs.readFileSync(path.join(__dirname, '../secrets/mongodb.pem'), 'utf8');
+    private secrets = JSON.parse(fs.readFileSync(path.join(__dirname, '../secrets/secrets.json'), 'utf8'));
+
+    private mongoUrl: string =  
+        "mongodb://" + 
+        this.secrets.mongodb.user + ":" + 
+        encodeURIComponent(this.secrets.mongodb.pwd) + "@" + 
+        this.secrets.mongodb.url + ":" + 
+        this.secrets.mongodb.port + "/" + 
+        this.secrets.mongodb.db + "?ssl=true";
     
     constructor() {
         this.app = express();
@@ -23,12 +34,19 @@ class App {
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({ extended: false }));
         this.app.use(cors());
-        this.app.set("jwtSecret", "lksdjfkhnsdf328hkas823nasdd");
+        this.app.set("jwtSecret", this.secrets.jwt);
     }
 
     private mongoSetup(): void {
         mongoose.Promise = global.Promise;
-        mongoose.connect(this.mongoUrl);
+        let options = {
+            ssl: true,
+            sslValidate: true,
+            sslCA: this.ca,
+            sslCert: this.cert,
+            sslKey: this.cert
+        }
+        mongoose.connect(this.mongoUrl, options);
     }
 
 }
