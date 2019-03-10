@@ -1,4 +1,4 @@
-import { SalesAgent } from './../models/salesAgent';
+import { SalesAgent } from './../models/sales-agent';
 
 export class SalesAgentController {
 

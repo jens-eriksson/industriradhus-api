@@ -6,11 +6,11 @@ export class UnitController {
         if (req.user.role == "admin") {
             let unit = new Unit(req.body);
 
-            unit.save((err, project) => {
+            unit.save((err, unit) => {
                 if (err) {
                     res.send(err);
                 }
-                res.json(project);
+                res.json(unit);
             });
         }
         else {
@@ -19,7 +19,12 @@ export class UnitController {
     }
 
     public getAll(req, res) {
-        Unit.find({}, (err, units) => {
+        let query = Unit.find({}).select("-documents");
+        if(req.user.role == "admin") {
+            query = Unit.find({});
+        }
+        
+        query.exec((err, units) => {
             if (err) {
                 res.send(err);
             }
@@ -28,11 +33,16 @@ export class UnitController {
     }
 
     public getByKey(req, res) {
-        Unit.findOne({ key: req.params.id }, (err, unit) => {
+        let query = Unit.findOne({ key: req.params.id }).select("-documents");
+        if(req.user.role == "admin") {
+            query = Unit.findOne({ key: req.params.id });
+        }
+
+        query.exec((err, units) => {
             if (err) {
                 res.send(err);
             }
-            res.json(unit);
+            res.json(units);
         });
     }
 

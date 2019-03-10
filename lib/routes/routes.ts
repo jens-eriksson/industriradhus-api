@@ -16,51 +16,56 @@ export class Routes {
     public setup(app): void {
         // /project
         app.route('/projects')
-        .get(this.projectController.getAll)   
+        .get(jwt({secret: app.get("jwtSecret")}), this.projectController.getAll)   
         .post(jwt({secret: app.get("jwtSecret")}), this.projectController.add);
 
         app.route('/projects/:id')
-        .get(this.projectController.getByKey)
+        .get(jwt({secret: app.get("jwtSecret")}), this.projectController.getByKey)
         .put(jwt({secret: app.get("jwtSecret")}), this.projectController.update)
         .delete(jwt({secret: app.get("jwtSecret")}), this.projectController.delete)
 
         app.route('/projects/:id/units')
-        .get(this.projectController.getUnits);
+        .get(jwt({secret: app.get("jwtSecret")}), this.projectController.getUnits);
 
         // /unit
         app.route('/units')
-        .get(this.unitController.getAll)
+        .get(jwt({secret: app.get("jwtSecret")}), this.unitController.getAll)
+        .get(jwt({secret: app.get("jwtSecret")}),this.unitController.getAll)
         .post(jwt({secret: app.get("jwtSecret")}), this.unitController.add);
 
         app.route('/units/:id')
-        .get(this.unitController.getByKey)
+        .get(jwt({secret: app.get("jwtSecret")}), this.unitController.getByKey)
+        .get(jwt({secret: app.get("jwtSecret")}),this.unitController.getByKey)
         .put(jwt({secret: app.get("jwtSecret")}), this.unitController.update)
         .delete(jwt({secret: app.get("jwtSecret")}), this.unitController.delete);
 
         // /floorplan
         app.route('/floorplans')
-        .get(this.floorplanController.getAll)
+        .get(jwt({secret: app.get("jwtSecret")}), this.floorplanController.getAll)
         .post(jwt({secret: app.get("jwtSecret")}), this.floorplanController.add);
 
         app.route('/floorplans/:id')
-        .get(this.floorplanController.getByKey)
+        .get(jwt({secret: app.get("jwtSecret")}), this.floorplanController.getByKey)
         .put(jwt({secret: app.get("jwtSecret")}), this.floorplanController.update)
         .delete(jwt({secret: app.get("jwtSecret")}), this.floorplanController.delete);
 
         // /salesAgent
         app.route('/sales-agents')
-        .get(this.salesAgentController.getAll)
+        .get(jwt({secret: app.get("jwtSecret")}), this.salesAgentController.getAll)
         .post(jwt({secret: app.get("jwtSecret")}), this.salesAgentController.add);
 
         app.route('/sales-agents/:id')
-        .get(this.salesAgentController.getByKey)
+        .get(jwt({secret: app.get("jwtSecret")}), this.salesAgentController.getByKey)
         .put(jwt({secret: app.get("jwtSecret")}), this.salesAgentController.update)
         .delete(jwt({secret: app.get("jwtSecret")}), this.salesAgentController.delete);
 
-         app.route('/auth/google')
+        app.route('/auth/google')
         .get(this.authController.googleSignIn);
 
         app.route('/auth/facebook')
         .get(this.authController.facebookSignIn);
+
+        app.route('/auth/anonymous')
+        .get(this.authController.anonymous);
     }
 }

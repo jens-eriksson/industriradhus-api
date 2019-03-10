@@ -3,7 +3,35 @@ import { Request, Response } from 'express';
 import * as rp from 'request-promise-native';
 import * as jwt from 'jsonwebtoken';
 
+const ANONYMOUS_ID = "5c80cd6b37c972165c7a0823";
+
 export class AuthController {
+
+    public anonymous(req: Request, res: Response) {
+        User.findById(ANONYMOUS_ID, (err, user) => {
+            if (err) {
+                console.log(err);
+                res.status(500).send("Authentication error");
+            }
+            else {
+                if (user.authorized) {
+                    let token = jwt.sign({
+                        exp: Math.floor(Date.now() / 1000) + (60 * 60 * 12),
+                        id: user._id,
+                        name: user.name,
+                        email: user.email,
+                        role: user.role
+                    },
+                        req.app.get("jwtSecret")
+                    );
+                    res.json(token);
+                }
+                else {
+                    res.status(401).send("Unauthorizd");
+                }
+            }
+        })
+    }
 
     public googleSignIn(req: Request, res: Response) {
         if (!req.query.id_token) {
@@ -40,6 +68,8 @@ export class AuthController {
                             if (user.authorized) {
                                 let token = jwt.sign({
                                     exp: Math.floor(Date.now() / 1000) + (60 * 60 * 12),
+                                    id: user._id,
+                                    name: user.name,
                                     email: user.email,
                                     role: user.role
                                 },
@@ -96,6 +126,8 @@ export class AuthController {
                             if (user.authorized) {
                                 let token = jwt.sign({
                                     exp: Math.floor(Date.now() / 1000) + (60 * 60),
+                                    id: user._id,
+                                    name: user.name,
                                     email: user.email,
                                     role: user.role
                                 },

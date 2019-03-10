@@ -3,9 +3,33 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var user_1 = require("../models/user");
 var rp = require("request-promise-native");
 var jwt = require("jsonwebtoken");
+var ANONYMOUS_ID = "5c80cd6b37c972165c7a0823";
 var AuthController = /** @class */ (function () {
     function AuthController() {
     }
+    AuthController.prototype.anonymous = function (req, res) {
+        user_1.User.findById(ANONYMOUS_ID, function (err, user) {
+            if (err) {
+                console.log(err);
+                res.status(500).send("Authentication error");
+            }
+            else {
+                if (user.authorized) {
+                    var token = jwt.sign({
+                        exp: Math.floor(Date.now() / 1000) + (60 * 60 * 12),
+                        id: user._id,
+                        name: user.name,
+                        email: user.email,
+                        role: user.role
+                    }, req.app.get("jwtSecret"));
+                    res.json(token);
+                }
+                else {
+                    res.status(401).send("Unauthorizd");
+                }
+            }
+        });
+    };
     AuthController.prototype.googleSignIn = function (req, res) {
         if (!req.query.id_token) {
             res.status(401).send("No authenication token");
@@ -37,6 +61,8 @@ var AuthController = /** @class */ (function () {
                         if (user.authorized) {
                             var token = jwt.sign({
                                 exp: Math.floor(Date.now() / 1000) + (60 * 60 * 12),
+                                id: user._id,
+                                name: user.name,
                                 email: user.email,
                                 role: user.role
                             }, req.app.get("jwtSecret"));
@@ -85,6 +111,8 @@ var AuthController = /** @class */ (function () {
                         if (user.authorized) {
                             var token = jwt.sign({
                                 exp: Math.floor(Date.now() / 1000) + (60 * 60),
+                                id: user._id,
+                                name: user.name,
                                 email: user.email,
                                 role: user.role
                             }, req.app.get("jwtSecret"));

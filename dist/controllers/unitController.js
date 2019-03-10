@@ -7,11 +7,11 @@ var UnitController = /** @class */ (function () {
     UnitController.prototype.add = function (req, res) {
         if (req.user.role == "admin") {
             var unit = new unit_1.Unit(req.body);
-            unit.save(function (err, project) {
+            unit.save(function (err, unit) {
                 if (err) {
                     res.send(err);
                 }
-                res.json(project);
+                res.json(unit);
             });
         }
         else {
@@ -19,7 +19,11 @@ var UnitController = /** @class */ (function () {
         }
     };
     UnitController.prototype.getAll = function (req, res) {
-        unit_1.Unit.find({}, function (err, units) {
+        var query = unit_1.Unit.find({}).select("-documents");
+        if (req.user.role == "admin") {
+            query = unit_1.Unit.find({});
+        }
+        query.exec(function (err, units) {
             if (err) {
                 res.send(err);
             }
@@ -27,11 +31,15 @@ var UnitController = /** @class */ (function () {
         });
     };
     UnitController.prototype.getByKey = function (req, res) {
-        unit_1.Unit.findOne({ key: req.params.id }, function (err, unit) {
+        var query = unit_1.Unit.findOne({ key: req.params.id }).select("-documents");
+        if (req.user.role == "admin") {
+            query = unit_1.Unit.findOne({ key: req.params.id });
+        }
+        query.exec(function (err, units) {
             if (err) {
                 res.send(err);
             }
-            res.json(unit);
+            res.json(units);
         });
     };
     UnitController.prototype.update = function (req, res) {
